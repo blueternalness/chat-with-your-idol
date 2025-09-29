@@ -1,6 +1,6 @@
 # Script for downloading and processing namuwiki data.
-from datasets import load_dataset, Dataset
-import pprint
+from datasets import load_dataset
+import json
 
 dataset = load_dataset("heegyu/namuwiki", split="train")
 
@@ -25,8 +25,9 @@ filtered_dataset = filtered_dataset.filter(
 # TODO: TBD - Should we extract/parse only personality?
 persona_candidates = {}
 for data in filtered_dataset:
-    character_name = data['title']
+    character_name = target_characters[data['title']]
     persona_candidates[character_name] = data['text']
 
-
+with open("../data/namuwiki_persona.json", "w") as f:
+    json.dump(persona_candidates, f, indent=4)
 
