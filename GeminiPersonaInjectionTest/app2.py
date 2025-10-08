@@ -2,11 +2,19 @@ import streamlit as st
 import google.generativeai as genai
 import json
 import os
+from transformers import pipeline
+
 
 # -------------------------
 # 1. API Key 설정
 # -------------------------
 genai.configure(api_key="AIzaSyBK0YF3_0RRC_KiWV4uSK_-m_hC-usk6o0")
+
+emotion_classifier = pipeline(
+    "text-classification",
+    model="j-hartmann/emotion-english-distilroberta-base", # 영문 모델이지만, 개념 증명을 위해 한글 답변을 번역하여 사용
+    top_k=1 # 가장 확률이 높은 감정 하나만 반환
+)
 
 # -------------------------
 # 2. 캐릭터별 페르소나 정의
@@ -99,6 +107,29 @@ elif st.session_state["page"] == "chat":
         with st.spinner(f"{character}가 대답 중... 🤔"):
             response = model.generate_content(user_input)
             bot_reply = response.text
+
+
+        # Text classification
+        emotion_results = emotion_classifier(bot_reply)
+        detected_emotion = emotion_results[0][0]['label']
+        print(detected_emotion.upper())
+        if detected_emotion.upper() == "JOY":
+            art = r"""
+                 _______
+               /'  .  . `\ 
+              /  .  .   . \
+             /  .  ^   ^  .\      <- 짱구 특유의 눈썹(단순 표현)
+            |   (  •   • )  |     <- 큰 눈
+            |      \___/     |    <- 웃는 입
+            |   \  _____  /  |
+             \   `'-----'`  / 
+              `\_________/' 
+                 /  | |  \
+                /___| |___\ 
+                  /_/ \_\
+            """
+
+            print(art)
 
         st.session_state["messages"].append(("bot", bot_reply))
         st.rerun()
